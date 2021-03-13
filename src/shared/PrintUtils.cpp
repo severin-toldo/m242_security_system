@@ -35,6 +35,10 @@ class PrintUtils {
         print(message, std::to_string(param));
     }
 
+    public: static void print() {
+        print("", "");
+    }
+
     public: static void print(std::string param) {
         print("", param);
     }

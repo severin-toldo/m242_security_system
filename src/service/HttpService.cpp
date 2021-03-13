@@ -33,5 +33,9 @@ class HttpService {
         PrintUtils::print("IP: ", socketAddress.get_ip_address());        
     }
 
+    public: WiFiInterface* getValueTmp() {
+        return wifiInterface;
+    }
+
     // TODO http functions
 };

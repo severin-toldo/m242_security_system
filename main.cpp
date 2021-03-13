@@ -3,66 +3,35 @@
 #include "OLEDDisplay.h"
 #include "http_request.h"
 #include "MbedJSONValue.h"
+#include "src/shared/PrintUtils.cpp"
+#include "src/service/HttpService.cpp"
 
-/*
-    0 = stoldo
-    1 = sitri
-    2 = school
-*/
-#define PROFILE 0
 
-#if defined(PROFILE) && PROFILE == 0
-    #define WIFI_SSID "eny-98710"
-    #define WIFI_PASSWORD "y32t-fcy8-mjxw-s6mp"
-#endif
-
-#if defined(PROFILE) && PROFILE == 1
-    #define WIFI_SSID "TODO"
-    #define WIFI_PASSWORD "TODO"
-#endif
-
-#if defined(PROFILE) && PROFILE == 2
-    #define WIFI_SSID "LERNKUBE"
-    #define WIFI_PASSWORD "l3rnk4b3"
-#endif
+#define WIFI_SSID "LERNKUBE"
+#define WIFI_PASSWORD "l3rnk4b3"
 
 
 OLEDDisplay oled(MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL);
 DigitalOut myled(MBED_CONF_IOTKIT_LED1);
+HttpService httpService(WIFI_SSID, WIFI_PASSWORD);
+
 
 int main() {
-    printf("\nProfile: %d...\n", PROFILE);
-
+    PrintUtils::print("----------------------------------------------------------");
+    PrintUtils::print("Defined Configs:");
+    PrintUtils::print("WIFI_SSID: ", WIFI_SSID);
+    PrintUtils::print("WIFI_PASSWORD: ", WIFI_PASSWORD);
+    PrintUtils::print("----------------------------------------------------------");
+    PrintUtils::print();
 
     oled.clear();
-
     oled.printf("Sunrise Sunset\n");
-    // Connect to the network with the default networking interface
-    // if you use WiFi: see mbed_app.json for the credentials
-    WiFiInterface* network = WiFiInterface::get_default_instance();
-    if (!network) {
-        printf("ERROR: No WiFiInterface found.\n");
-        return -1;
-    }
 
-    printf("\nConnecting to %s...\n", WIFI_SSID);
-    int ret = network->connect(WIFI_SSID, WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
-    if (ret != 0) {
-        printf("\nConnection error: %d\n", ret);
-        return -1;
-    }
-    printf("Success\n\n");
-    printf("MAC: %s\n", network->get_mac_address());
-    SocketAddress a;
-    network->get_ip_address(&a);
-    printf("IP: %s\n", a.get_ip_address());    
-
-    while( 1 )
-    {
+    while(true) {
         myled = 1;
         // By default the body is automatically parsed and stored in a buffer, this is memory heavy.
         // To receive chunked response, pass in a callback as last parameter to the constructor.
-        HttpRequest* get_req = new HttpRequest(network, HTTP_GET, "http://api.sunrise-sunset.org/json?lat=47.3686498&lng=8.5391825");
+        HttpRequest* get_req = new HttpRequest(httpService.getValueTmp(), HTTP_GET, "http://api.sunrise-sunset.org/json?lat=47.3686498&lng=8.5391825");
 
         HttpResponse* get_res = get_req->send();
         // OK
