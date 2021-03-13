@@ -1,20 +1,40 @@
-/** Beispiel Abfrage Cloud Dienst Sunrise / Sunset
- */
 #include "mbed.h"
 #include <string>
 #include "OLEDDisplay.h"
 #include "http_request.h"
 #include "MbedJSONValue.h"
 
-// UI
-OLEDDisplay oled( MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL );
-// I/O Buffer
-char message[6000];
+/*
+    0 = stoldo
+    1 = sitri
+    2 = school
+*/
+#define PROFILE 0
 
-DigitalOut myled( MBED_CONF_IOTKIT_LED1 );
+#if defined(PROFILE) && PROFILE == 0
+    #define WIFI_SSID "eny-98710"
+    #define WIFI_PASSWORD "y32t-fcy8-mjxw-s6mp"
+#endif
 
-int main()
-{
+#if defined(PROFILE) && PROFILE == 1
+    #define WIFI_SSID "TODO"
+    #define WIFI_PASSWORD "TODO"
+#endif
+
+#if defined(PROFILE) && PROFILE == 2
+    #define WIFI_SSID "LERNKUBE"
+    #define WIFI_PASSWORD "l3rnk4b3"
+#endif
+
+
+
+OLEDDisplay oled(MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL);
+DigitalOut myled(MBED_CONF_IOTKIT_LED1);
+
+int main() {
+    printf("\nProfile: %d...\n", PROFILE);
+
+
     oled.clear();
     
     oled.printf("Sunrise Sunset\n");
@@ -26,8 +46,8 @@ int main()
         return -1;
     }
 
-    printf("\nConnecting to %s...\n", MBED_CONF_APP_WIFI_SSID);
-    int ret = network->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
+    printf("\nConnecting to %s...\n", WIFI_SSID);
+    int ret = network->connect(WIFI_SSID, WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
     if (ret != 0) {
         printf("\nConnection error: %d\n", ret);
         return -1;
