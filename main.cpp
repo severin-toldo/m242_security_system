@@ -27,7 +27,6 @@
 #endif
 
 
-
 OLEDDisplay oled(MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL);
 DigitalOut myled(MBED_CONF_IOTKIT_LED1);
 
@@ -36,7 +35,7 @@ int main() {
 
 
     oled.clear();
-    
+
     oled.printf("Sunrise Sunset\n");
     // Connect to the network with the default networking interface
     // if you use WiFi: see mbed_app.json for the credentials
