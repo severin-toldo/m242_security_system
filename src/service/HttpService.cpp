@@ -90,16 +90,14 @@ class HttpService {
         }
 
         logResponse(httpResponse);
+        delete httpRequest;
 
         if (httpResponse) {
             MbedJSONValue responseBodyAsJson;
             parse(responseBodyAsJson, httpResponse->get_body_as_string().c_str());
-            delete httpRequest;
             
             return responseBodyAsJson;
         } else {
-            ExceptionUtils::throwException("Http Request failed with code ", httpRequest->get_error());
-
             return NULL;
         }
     }

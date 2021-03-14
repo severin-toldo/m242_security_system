@@ -1,2 +1,4 @@
 #define WIFI_SSID "LERNKUBE"
-#define WIFI_PASSWORD "l3rnk4b3"
+#define WIFI_PASSWORD "l3rnk4b3"#define API_BASE_URL "http://192.168.1.103:8080"
+#define SECURITY_SYSTEM_ID 1
+#define SECURITY_SYSTEM_AUTH_TOKEN "abcdefg"
