@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include "mbed.h"
 #include "src/shared/PrintUtils.cpp"
@@ -46,6 +47,22 @@ class HttpService {
     }
 
     public: MbedJSONValue get(std::string url, HttpOptions* httpOptions) {
+        return httpRequest(url, HTTP_GET, httpOptions, "");
+    }
+
+    public: MbedJSONValue post(std::string url, std::string body) {
+        return post(url, body, NULL);
+    }
+
+    public: MbedJSONValue post(std::string url, std::string body, HttpOptions* httpOptions) {
+        return httpRequest(url, HTTP_POST, httpOptions, body);
+    }
+
+    private: MbedJSONValue httpRequest(std::string url, http_method httpMethod, HttpOptions* httpOptions, std::string body) {
+        // TODO maybe use intercetors?
+        // TODO log stuff here
+        // TODO improve response logging
+        
         if (httpOptions && httpOptions->getQueryParams().size() > 0) {
             url = url + "?";
             
@@ -55,18 +72,23 @@ class HttpService {
             }
         }
 
-        PrintUtils::print("url: ", url);
-        
-        HttpRequest* httpRequest = new HttpRequest(wifiInterface, HTTP_GET, url.c_str());
+        HttpRequest* httpRequest = new HttpRequest(wifiInterface, httpMethod, url.c_str());
 
-        if (httpOptions) {
-            for (int i = 0; i < httpOptions->getHeaders().size(); i++) {
-                std::pair<std::string, std::string> header = httpOptions->getHeaders().at(i);
-                httpRequest->set_header(header.first, header.second);
-            }
+        httpOptions = httpOptions ? httpOptions : new HttpOptions();
+        httpOptions->addHeader("Content-Type", "application/json");
+        
+        for (int i = 0; i < httpOptions->getHeaders().size(); i++) {
+            std::pair<std::string, std::string> header = httpOptions->getHeaders().at(i);
+            httpRequest->set_header(header.first, header.second);
         }
         
-        HttpResponse* httpRespone = httpRequest->send();
+        HttpResponse* httpRespone = NULL;
+
+        if (strlen(body.c_str()) > 0) {
+            httpRespone = httpRequest->send(body.c_str(), strlen(body.c_str()));
+        } else {
+            httpRespone = httpRequest->send();
+        }
 
         if (httpRespone) {
             MbedJSONValue responseBodyAsJson;
@@ -80,28 +102,4 @@ class HttpService {
             return NULL;
         }
     }
-
-
-
-
-    /*
-    public: void tmp2() {
-        HttpRequest* get_req = new HttpRequest( network, HTTP_POST, message );
-
-        HttpResponse* get_res = get_req->send();
-        if (!get_res)
-        {
-            printf("HttpRequest failed (error code %d)\n", get_req->get_error());
-            return 1;
-        }
-        delete get_req;
-    }
-    */
-
-
-
-
-
-
-
 };
