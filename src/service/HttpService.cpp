@@ -4,6 +4,7 @@
 #include "mbed.h"
 #include "src/shared/PrintUtils.cpp"
 #include "src/shared/ExceptionUtils.cpp"
+#include "src/shared/StringUtils.cpp"
 #include "MbedJSONValue.h"
 #include "http_request.h"
 #include "src/model/HttpOptions.cpp"
@@ -59,9 +60,7 @@ class HttpService {
     }
 
     private: MbedJSONValue httpRequest(std::string url, http_method httpMethod, HttpOptions* httpOptions, std::string body) {
-        // TODO maybe use intercetors?
-        // TODO log stuff here
-        // TODO improve response logging
+        logRequest(url, httpMethod, httpOptions, body);
         
         if (httpOptions && httpOptions->getQueryParams().size() > 0) {
             url = url + "?";
@@ -82,17 +81,19 @@ class HttpService {
             httpRequest->set_header(header.first, header.second);
         }
         
-        HttpResponse* httpRespone = NULL;
+        HttpResponse* httpResponse = NULL;
 
         if (strlen(body.c_str()) > 0) {
-            httpRespone = httpRequest->send(body.c_str(), strlen(body.c_str()));
+            httpResponse = httpRequest->send(body.c_str(), strlen(body.c_str()));
         } else {
-            httpRespone = httpRequest->send();
+            httpResponse = httpRequest->send();
         }
 
-        if (httpRespone) {
+        logResponse(httpResponse);
+
+        if (httpResponse) {
             MbedJSONValue responseBodyAsJson;
-            parse(responseBodyAsJson, httpRespone->get_body_as_string().c_str());
+            parse(responseBodyAsJson, httpResponse->get_body_as_string().c_str());
             delete httpRequest;
             
             return responseBodyAsJson;
@@ -100,6 +101,32 @@ class HttpService {
             ExceptionUtils::throwException("Http Request failed with code ", httpRequest->get_error());
 
             return NULL;
+        }
+    }
+
+    // TODO request method to string
+    private: void logRequest(std::string url, http_method httpMethod, HttpOptions* httpOptions, std::string body) {
+        PrintUtils::print("Request:");
+        PrintUtils::print("URL: ", url);
+        PrintUtils::print("METHOD: ", httpMethod);
+        // PrintUtils::print("HEADERS: ", StringUtils::toString(httpOptions->getHeaders()));
+        // PrintUtils::print("QUERY PARAMS: ", StringUtils::toString(httpOptions->getQueryParams()));
+        PrintUtils::print("REQUEST BODY: ", body);
+        PrintUtils::print();
+    }
+
+    // TODO status code to string
+    private: void logResponse(HttpResponse* httpResponse) {
+        if (httpResponse) {
+            PrintUtils::print("Response:");
+            PrintUtils::print("STATUS CODE: ", httpResponse->get_status_code());
+            PrintUtils::print("STATUS MESSAGE: ", httpResponse->get_status_message());
+            PrintUtils::print("RESPONSE BODY: ", httpResponse->get_body_as_string());
+            PrintUtils::print();
+            PrintUtils::print();
+        } else  {
+            PrintUtils::print("Could not get any response.");
+            PrintUtils::print();
         }
     }
 };
