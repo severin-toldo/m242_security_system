@@ -5,28 +5,13 @@
 #include "MbedJSONValue.h"
 #include "src/shared/PrintUtils.cpp"
 #include "src/service/HttpService.cpp"
-
-
-#define WIFI_SSID "eny-98710"
-#define WIFI_PASSWORD "y32t-fcy8-mjxw-s6mp"
+#include "config.cpp"
 
 
 OLEDDisplay oled(MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL);
+HttpService httpService(WIFI_SSID, WIFI_PASSWORD);
 
-
-int main() {
-    PrintUtils::print("----------------------------------------------------------");
-    PrintUtils::print("Defined Configs:");
-    PrintUtils::print("WIFI_SSID: ", WIFI_SSID);
-    PrintUtils::print("WIFI_PASSWORD: ", WIFI_PASSWORD);
-    PrintUtils::print("----------------------------------------------------------");
-    PrintUtils::print();
-
-
-    HttpService httpService(WIFI_SSID, WIFI_PASSWORD);
-
-
-
+int main() {    
     /*
         GET EXAMPLE
     */
@@ -57,5 +42,4 @@ int main() {
     while(true) {
         thread_sleep_for(10000);
     }
-
 }
