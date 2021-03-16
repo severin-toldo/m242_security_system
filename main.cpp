@@ -1,15 +1,16 @@
 #include "mbed.h"
 #include <string>
-#include "OLEDDisplay.h"
 #include "http_request.h"
 #include "MbedJSONValue.h"
 #include "src/shared/PrintUtils.cpp"
 #include "src/service/HttpService.cpp"
 #include "src/service/SecuritySystemHistoryService.cpp"
+#include "src/service/OLEDDisplayService.cpp"
+#include "src/service/RFIDReaderService.cpp"
+#include "src/service/SecuritySystemService.cpp"
+#include "src/model/RFIDData.cpp"
 #include "config.cpp"
 
-
-OLEDDisplay oled(MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL);
 
 int main() {
     PrintUtils::print("----------------------------------------------------------");
@@ -23,10 +24,44 @@ int main() {
     PrintUtils::print();
 
     HttpService* httpService = new HttpService(WIFI_SSID, WIFI_PASSWORD);
+    SecuritySystemService* securitySystemService = new SecuritySystemService(httpService);
     SecuritySystemHistoryService* securitySystemHistoryService = new SecuritySystemHistoryService(httpService);
+    OLEDDisplayService* oledDisplayService = new OLEDDisplayService();
+    RFIDReaderService* rfidReaderService = new RFIDReaderService();
+    
+    while (true) {
+        RFIDData* rfidData = rfidReaderService->getRFIDData();
+
+        if (rfidData) {
+            std::string status = securitySystemService->changeStatus();
+            oledDisplayService->clear();
+            oledDisplayService->print(status);
+        }
+
+        thread_sleep_for(1500);
+    }
+
+     
+    
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+    // TODO move conf into service also oled etc creates service
+
+    /*
+   
 
     SecuritySystemHistoryCreateRequest sshcr;
     sshcr.setType("ACTIVATED");
@@ -34,17 +69,7 @@ int main() {
     sshcr.setUserRfidUUID("a3:6b:c8:j9"); // TODO
 
     bool res = securitySystemHistoryService->addHistory(SECURITY_SYSTEM_AUTH_TOKEN, SECURITY_SYSTEM_ID, sshcr);
-
-
-
-
-
-
-
-
-
-
-
+    */
 
     /*
 
@@ -81,8 +106,4 @@ int main() {
     // PrintUtils::print("text1: ", text1);
     // PrintUtils::print("number1: ", number1);
     */
-    
-    while(true) {
-        thread_sleep_for(10000);
-    }
 }
