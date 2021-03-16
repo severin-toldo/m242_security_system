@@ -3,18 +3,9 @@
 
 
 class SecuritySystemHistoryCreateRequest {
-    private: std::string datetime;
     private: std::string type; // ACTIVATED || DEACTIVATED || ALARM
     private: std::string userRfidUUID;
 
-
-    public: std::string getDatetime() {
-        return datetime;
-    }
-
-    public: void setDatetime(std::string datetime) {
-        this->datetime = datetime;
-    }
 
     public: std::string getType() {
         return type;

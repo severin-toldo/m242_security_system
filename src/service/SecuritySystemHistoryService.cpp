@@ -20,7 +20,6 @@ class SecuritySystemHistoryService {
         options->addHeader("auth_token", securitySystemAuthToken);
 
         MbedJSONValue body;
-        body["datetime"] = sshcr.getDatetime();
         body["type"] = sshcr.getType();
         body["userRfidUUID"] = sshcr.getUserRfidUUID();
 
