@@ -38,14 +38,12 @@ int main() {
            }
            
            RFIDData* rfidData = rfidReaderService->getRFIDData();
-
-           PrintUtils::print(rfidData->getRfidUUID());
            
            if (rfidData) {
                std::string status = securitySystemService->changeStatus(rfidData->getRfidUUID());
-               oledDisplayService->print(status);
                thread_sleep_for(20000);
-            }
+               oledDisplayService->print(status);
+           }
        } else {
            oledDisplayService->print("Press User Button to start pairing.");
 
