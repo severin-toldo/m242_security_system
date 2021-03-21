@@ -43,23 +43,23 @@ class HttpService {
         PrintUtils::print();      
     }
 
-    public: MbedJSONValue get(std::string url) {
+    public: std::string get(std::string url) {
         return get(url, NULL);
     }
 
-    public: MbedJSONValue get(std::string url, HttpOptions* httpOptions) {
+    public: std::string get(std::string url, HttpOptions* httpOptions) {
         return httpRequest(url, HTTP_GET, httpOptions, "");
     }
 
-    public: MbedJSONValue post(std::string url, std::string body) {
+    public: std::string post(std::string url, std::string body) {
         return post(url, body, NULL);
     }
 
-    public: MbedJSONValue post(std::string url, std::string body, HttpOptions* httpOptions) {
+    public: std::string post(std::string url, std::string body, HttpOptions* httpOptions) {
         return httpRequest(url, HTTP_POST, httpOptions, body);
     }
 
-    private: MbedJSONValue httpRequest(std::string url, http_method httpMethod, HttpOptions* httpOptions, std::string body) {
+    private: std::string httpRequest(std::string url, http_method httpMethod, HttpOptions* httpOptions, std::string body) {
         logRequest(url, httpMethod, httpOptions, body);
         
         if (httpOptions && httpOptions->getQueryParams().size() > 0) {
@@ -90,16 +90,10 @@ class HttpService {
         }
 
         logResponse(httpResponse);
+        std::string response = httpResponse ? httpResponse->get_body_as_string() : NULL;
         delete httpRequest;
 
-        if (httpResponse) {
-            MbedJSONValue responseBodyAsJson;
-            parse(responseBodyAsJson, httpResponse->get_body_as_string().c_str());
-            
-            return responseBodyAsJson;
-        } else {
-            return NULL;
-        }
+        return response;
     }
 
     // TODO request method to string

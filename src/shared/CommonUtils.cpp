@@ -9,4 +9,8 @@ class CommonUtils {
         
         return hexString;
     }
+
+    public: static bool stringToBoolean(std::string stringValue) {
+        return stringValue == "true" ? true : false;
+    }
 };

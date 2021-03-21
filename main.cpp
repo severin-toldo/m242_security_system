@@ -4,10 +4,10 @@
 #include "MbedJSONValue.h"
 #include "src/shared/PrintUtils.cpp"
 #include "src/service/HttpService.cpp"
-#include "src/service/SecuritySystemHistoryService.cpp"
 #include "src/service/OLEDDisplayService.cpp"
 #include "src/service/RFIDReaderService.cpp"
 #include "src/service/SecuritySystemService.cpp"
+#include "src/service/UserButtonService.cpp"
 #include "src/model/RFIDData.cpp"
 #include "config.cpp"
 
@@ -23,22 +23,45 @@ int main() {
     PrintUtils::print("----------------------------------------------------------");
     PrintUtils::print();
 
+    OLEDDisplayService* oledDisplayService = new OLEDDisplayService("Starting Security System...");
+    RFIDReaderService* rfidReaderService = new RFIDReaderService();
+    UserButtonService* userButtonService = new UserButtonService();
     HttpService* httpService = new HttpService(WIFI_SSID, WIFI_PASSWORD);
     SecuritySystemService* securitySystemService = new SecuritySystemService(httpService);
-    SecuritySystemHistoryService* securitySystemHistoryService = new SecuritySystemHistoryService(httpService);
-    OLEDDisplayService* oledDisplayService = new OLEDDisplayService();
-    RFIDReaderService* rfidReaderService = new RFIDReaderService();
     
     while (true) {
-        RFIDData* rfidData = rfidReaderService->getRFIDData();
+       if (securitySystemService->getIsPaired()) {
+           oledDisplayService->print(securitySystemService->getStatus());
 
-        if (rfidData) {
-            std::string status = securitySystemService->changeStatus();
-            oledDisplayService->clear();
-            oledDisplayService->print(status);
-        }
+           if (securitySystemService->getStatus() == "ACTIVATED") {
+               // TODO alarm stuff
+           }
+           
+           RFIDData* rfidData = rfidReaderService->getRFIDData();
 
-        thread_sleep_for(1500);
+           PrintUtils::print(rfidData->getRfidUUID());
+           
+           if (rfidData) {
+               std::string status = securitySystemService->changeStatus(rfidData->getRfidUUID());
+               oledDisplayService->print(status);
+               thread_sleep_for(20000);
+            }
+       } else {
+           oledDisplayService->print("Press User Button to start pairing.");
+
+           if (userButtonService->isButtonPressed()) {
+               oledDisplayService->print("Start Pairing...");
+               
+               std::string pairingCode = securitySystemService->startPairing();
+               
+               oledDisplayService->print("Pairing Code:\n" + pairingCode + "\nPlease restart the device now.");
+               oledDisplayService->print(pairingCode);
+
+               return 0;
+           }
+       }
+
+        thread_sleep_for(200);
     }
 
      
@@ -106,4 +129,7 @@ int main() {
     // PrintUtils::print("text1: ", text1);
     // PrintUtils::print("number1: ", number1);
     */
+/*
+     MbedJSONValue responseBodyAsJson;
+            parse(responseBodyAsJson, httpResponse->get_body_as_string().c_str());*/
 }
