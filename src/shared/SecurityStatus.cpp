@@ -2,6 +2,7 @@
 #pragma once
 
 enum SecurityStatus { 
-    deactivated, 
-    activated 
+    DEACTIVATED, 
+    ACTIVATED,
+    ALARM
 };

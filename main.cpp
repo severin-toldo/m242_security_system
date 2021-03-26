@@ -1,4 +1,7 @@
 #include "mbed.h"
+#include <algorithm>
+#include <cstddef>
+#include <cstdio>
 #include <string>
 #include "http_request.h"
 #include "MbedJSONValue.h"
@@ -8,6 +11,8 @@
 #include "src/service/RFIDReaderService.cpp"
 #include "src/service/SecuritySystemService.cpp"
 #include "src/service/UserButtonService.cpp"
+#include "src/service/CountdownService.cpp"
+#include "src/service/ToFSensorService.cpp"
 #include "src/model/RFIDData.cpp"
 #include "config.cpp"
 
@@ -24,26 +29,44 @@ int main() {
     PrintUtils::print();
 
     OLEDDisplayService* oledDisplayService = new OLEDDisplayService("Starting Security System...");
+    oledDisplayService->clear();
+
     RFIDReaderService* rfidReaderService = new RFIDReaderService();
     UserButtonService* userButtonService = new UserButtonService();
     HttpService* httpService = new HttpService(WIFI_SSID, WIFI_PASSWORD);
     SecuritySystemService* securitySystemService = new SecuritySystemService(httpService);
-    
+    CountdownService* countdownService = new CountdownService(oledDisplayService);
+    ToFSensorService* toFSensorService = new ToFSensorService();
+
+    bool changed = true;
     while (true) {
        if (securitySystemService->getIsPaired()) {
            SecurityStatus status = securitySystemService->getStatus();
-           oledDisplayService->print(CommonUtils::enum_to_string(status));
-           oledDisplayService->printImageRight(CommonUtils::enum_to_image(status));
 
-           if (securitySystemService->getStatus() == SecurityStatus::activated) {
-               // TODO alarm stuff
+           if(changed) {
+               oledDisplayService->print(CommonUtils::enum_to_string(status));
+               oledDisplayService->printImageRight(CommonUtils::enum_to_image(status));
+               changed = false;
+           }
+
+           if (status == SecurityStatus::ACTIVATED) {
+               if(!toFSensorService->isInRange()) {
+                   if(securitySystemService->sendAlarm()) {
+                       //TODO: DUMMY CODE
+                       while (securitySystemService->getStatus() == SecurityStatus::ALARM) {
+                            thread_sleep_for(1000);
+                       }
+                   }
+               }
            }
            
            RFIDData* rfidData = rfidReaderService->getRFIDData();
-           
            if (rfidData) {
-               securitySystemService->changeStatus(rfidData->getRfidUUID());
-               thread_sleep_for(20000);
+               SecurityStatus newStatus = securitySystemService->changeStatus(rfidData->getRfidUUID());
+               changed = newStatus != status;
+               if(changed) {
+                    countdownService->begin(20);    
+               }
            }
        } else {
            oledDisplayService->print("Press User Button to start pairing.");

@@ -12,7 +12,7 @@
 class SecuritySystemService {
 
     private: HttpService* httpService;
-    private: SecurityStatus status = deactivated;
+    private: SecurityStatus status = DEACTIVATED;
     private: bool isPaired = false;
 
 
@@ -26,13 +26,22 @@ class SecuritySystemService {
     }
 
     public: SecurityStatus changeStatus(std::string userRfidUUID) {
-        SecurityStatus newStatus = status == deactivated ? activated : deactivated;
+        SecurityStatus newStatus = status >= 1 ? DEACTIVATED : ACTIVATED;
 
         if (addHistory(newStatus, userRfidUUID)) {
-            status = newStatus; 
+            status = newStatus;
         }
 
         return status;
+    }
+
+    public: bool sendAlarm() {
+        if (addHistory(SecurityStatus::ALARM, "SYSTEM")) {
+            status = SecurityStatus::ALARM;
+            return true;
+        }
+
+        return false;
     }
 
     public: bool getIsPaired() {

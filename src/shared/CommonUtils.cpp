@@ -14,10 +14,12 @@ class CommonUtils {
 
     public: static std::string enum_to_string(SecurityStatus status) {
         switch (status) {
-            case deactivated:
+            case DEACTIVATED:
                 return "DEACTIVATED";
-            case activated:
+            case ACTIVATED:
                 return "ACTIVATED";
+            case ALARM:
+                return "ALARM";
             default:
                 return "Invalid Status";
         }
@@ -25,9 +27,10 @@ class CommonUtils {
 
     public: static const unsigned char *enum_to_image(SecurityStatus status) {
         switch (status) {
-            case deactivated:
+            case DEACTIVATED:
                 return Images::getLockOpen();
-            case activated:
+            case ACTIVATED:
+            case ALARM:
                 return Images::getLockClosed();
             default:
                 return nullptr;
