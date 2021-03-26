@@ -18,13 +18,17 @@ class ToFSensorService {
     public: bool isInRange() {
         uint32_t distance;
         int status = range->get_distance(&distance);
-        if(status == VL53L0X_ERROR_NONE) {
+
+        printf("Alarm threshold / Current: %d    /   %d\n", startDistance, distance);
+        if(status == VL53L0X_ERROR_NONE) {    
             if(startDistance == 0) {
-                startDistance = distance;
+                startDistance = distance - 15;
             }
 
-            return distance < startDistance;
+            return distance >= startDistance;
         }
+
+        printf("couldn't read distance\n");
 
         return false;
     }
