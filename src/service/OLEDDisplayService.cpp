@@ -27,4 +27,8 @@ class OLEDDisplayService {
     public: void clear() {
         oledDisplay->clear();
     }
+
+    public: void printImageRight(const unsigned char *bitmap){
+        oledDisplay->printImage(bitmap, 32, 0);
+    }
 };

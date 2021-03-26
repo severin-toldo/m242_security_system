@@ -1,5 +1,6 @@
 #include "src/service/OLEDDisplayService.cpp"
 #include "src/service/HttpService.cpp"
+#include "src/shared/SecurityStatus.cpp"
 #include <string>
 #pragma once
 
@@ -7,19 +8,19 @@
 class SecuritySystemService {
 
     private: HttpService* httpService;
-    private: std::string status = "DEACTIVATED"; // ACTIVATED || DEACTIVATED
+    private: SecurityStatus status = deactivated;
 
 
     public: SecuritySystemService(HttpService* httpService) {
         this->httpService = httpService;
     }
 
-    public: std::string getStatus() {
+    public: SecurityStatus getStatus() {
         return status;
     }
 
-    public: std::string changeStatus() {
-        status = status == "ACTIVATED" ? "DEACTIVATED" : "ACTIVATED";
+    public: SecurityStatus changeStatus() {
+        status = status == deactivated ? activated : deactivated;
         return status;
     }
 };
