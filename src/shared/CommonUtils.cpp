@@ -33,4 +33,8 @@ class CommonUtils {
                 return nullptr;
         }
     }
+    
+    public: static bool stringToBoolean(std::string stringValue) {
+        return stringValue == "true" ? true : false;
+    }
 };

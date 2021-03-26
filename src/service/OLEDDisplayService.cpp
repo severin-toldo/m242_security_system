@@ -11,12 +11,14 @@ class OLEDDisplayService {
     private: OLEDDisplay* oledDisplay;
 
 
-    public: OLEDDisplayService() {
+    public: OLEDDisplayService(std::string initMessage = "") {
         oledDisplay = new OLEDDisplay(MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL);
-        clear();
+        print(initMessage);
     }
 
     public: void print(std::string message) {
+        clear();
+        cursor(0, 0);
         oledDisplay->printf(StringUtils::concat(message, "\n").c_str());
     }
 
