@@ -1,5 +1,6 @@
 #include "VL53L0X.h"
 #include <cstdint>
+#pragma once
 
 class ToFSensorService {
     private: DevI2C *devI2c;

@@ -42,3 +42,5 @@ HTS221/ST_INTERFACES
 HTS221/X_NUCLEO_COMMON
 iotkit/drivers/COMPONENT_wifi_ism43362
 vl53l0x
+IoTKit
+IoTKit/drivers/COMPONENT_wifi_ism43362
