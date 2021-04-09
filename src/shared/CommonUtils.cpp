@@ -1,3 +1,4 @@
+#include <chrono>
 #include <string>
 #include "src/shared/SecurityStatus.cpp"
 #include "src/shared/Images.h"
@@ -39,5 +40,13 @@ class CommonUtils {
     
     public: static bool stringToBoolean(std::string stringValue) {
         return stringValue == "true" ? true : false;
+    }
+
+    public: static time_t getCurrentTime() {
+        return std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    }
+
+    public: static double getDurationSeconds(time_t start, time_t end) {
+        return difftime(end, start);
     }
 };

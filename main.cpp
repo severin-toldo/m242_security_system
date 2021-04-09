@@ -50,16 +50,23 @@ int main() {
            }
 
            if (status == SecurityStatus::ACTIVATED) {
+               printf("hello\n");
                if(!toFSensorService->isInRange()) {
-                   if(securitySystemService->sendAlarm()) {
-                       //TODO: DUMMY CODE
-                       while (securitySystemService->getStatus() == SecurityStatus::ALARM) {
-                            thread_sleep_for(1000);
-                       }
-                   }
-               }
+                   printf("Alarmed\n");
+                   securitySystemService->activateAlarm();
+               }   
            }
            
+           if(status == SecurityStatus::ALARM) {
+               if(securitySystemService->shouldSendAlarm()) {
+                    securitySystemService->sendAlarm();
+                    //TODO: DUMMY CODE
+                    while (securitySystemService->getStatus() == SecurityStatus::ALARM) {
+                        thread_sleep_for(1000);
+                    }
+                }
+           }
+
            RFIDData* rfidData = rfidReaderService->getRFIDData();
            if (rfidData) {
                SecurityStatus newStatus = securitySystemService->changeStatus(rfidData->getRfidUUID());
@@ -68,6 +75,7 @@ int main() {
                     countdownService->begin(20);    
                }
            }
+
        } else {
            oledDisplayService->print("Press User Button to start pairing.");
 
@@ -85,73 +93,4 @@ int main() {
 
         thread_sleep_for(200);
     }
-
-     
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // TODO move conf into service also oled etc creates service
-
-    /*
-   
-
-    SecuritySystemHistoryCreateRequest sshcr;
-    sshcr.setType("ACTIVATED");
-    sshcr.setDatetime("2021-03-14T14:42:23-0000"); // TODO
-    sshcr.setUserRfidUUID("a3:6b:c8:j9"); // TODO
-
-    bool res = securitySystemHistoryService->addHistory(SECURITY_SYSTEM_AUTH_TOKEN, SECURITY_SYSTEM_ID, sshcr);
-    */
-
-    /*
-
-    
-        GET EXAMPLE
-    
-    HttpOptions* options = new HttpOptions();
-    options->addHeader("my_header", "yeet");
-    options->addQueryParam("param", "lalalal");
-
-    MbedJSONValue response = httpService.get("http://192.168.1.103:8080/api/test/custom", options);
-            
-    std::string text = response["text"].get<std::string>();
-    int number  = response["number"].get<int>();
-
-    // PrintUtils::print("text: ", text);
-    // PrintUtils::print("number: ", number);
-
-    
-        POST EXAMPLE
-    
-    MbedJSONValue body;
-    body["text"] = "my cool text";
-    body["number"] = 120;
-
-    MbedJSONValue response1 = httpService.post("http://192.168.1.103:8080/api/test/customjsjsjsjsjsj", body.serialize());
-
-
-
-            
-    std::string text1 = response1["text"].get<std::string>();
-    int number1  = response1["number"].get<int>();
-
-    // PrintUtils::print("text1: ", text1);
-    // PrintUtils::print("number1: ", number1);
-    */
-/*
-     MbedJSONValue responseBodyAsJson;
-            parse(responseBodyAsJson, httpResponse->get_body_as_string().c_str());*/
 }

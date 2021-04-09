@@ -1,6 +1,8 @@
 #include "src/service/OLEDDisplayService.cpp"
 #include "src/service/HttpService.cpp"
 #include "src/shared/SecurityStatus.cpp"
+#include <chrono>
+#include <ctime>
 #include <string>
 #include "config.cpp"
 #include "src/model/HttpOptions.cpp"
@@ -8,11 +10,11 @@
 #include "src/shared/CommonUtils.cpp"
 #pragma once
 
-
 class SecuritySystemService {
 
     private: HttpService* httpService;
     private: SecurityStatus status = DEACTIVATED;
+    private: time_t lastChanged = CommonUtils::getCurrentTime();
     private: bool isPaired = false;
 
 
@@ -30,14 +32,26 @@ class SecuritySystemService {
 
         if (addHistory(newStatus, userRfidUUID)) {
             status = newStatus;
+            lastChanged = CommonUtils::getCurrentTime();
         }
 
         return status;
     }
 
+    public: void activateAlarm() {
+        status = SecurityStatus::ALARM;
+        lastChanged = CommonUtils::getCurrentTime();
+    }
+
+    public: bool shouldSendAlarm() {
+        return status == SecurityStatus::ALARM 
+            && CommonUtils::getDurationSeconds(lastChanged, CommonUtils::getCurrentTime()) >= 20;
+    }
+
     public: bool sendAlarm() {
         if (addHistory(SecurityStatus::ALARM, "SYSTEM")) {
             status = SecurityStatus::ALARM;
+            lastChanged = CommonUtils::getCurrentTime();
             return true;
         }
 

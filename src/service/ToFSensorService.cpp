@@ -18,12 +18,20 @@ class ToFSensorService {
 
     public: bool isInRange() {
         uint32_t distance;
-        int status = range->get_distance(&distance);
+
+        int status;
+        do {
+            status = range->get_distance(&distance);
+        }while (status != VL53L0X_ERROR_NONE);
+         
 
         printf("Alarm threshold / Current: %d    /   %d\n", startDistance, distance);
         if(status == VL53L0X_ERROR_NONE) {    
             if(startDistance == 0) {
                 startDistance = distance - 15;
+            }
+            if(startDistance > 2000) {
+                startDistance = 2000;
             }
 
             return distance >= startDistance;
